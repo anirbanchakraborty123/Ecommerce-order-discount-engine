@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.utils import timezone
 from django.db.models import Sum, F, Count
 from django.conf import settings
-
+from .utils import DiscountCalculator
 class CustomUser(AbstractUser):
     """Extended user model for e-commerce platform"""
     loyalty_points = models.PositiveIntegerField(default=0)
@@ -174,6 +174,27 @@ class Order(models.Model):
     
     def __str__(self):
         return f"Order #{self.id} - {self.user.username}"
+    
+        def calculate_discounts(self):
+        """Calculate all applicable discounts for this order"""
+        calculator = DiscountCalculator(self)
+        return calculator.calculate_discounts()
+    
+    def save(self, *args, **kwargs):
+        """Override save to ensure proper amounts are set"""
+        
+        if not self.pk:
+            # New order - calculate subtotal from items
+            super().save(*args, **kwargs)
+            return
+        
+        # Calculate final amount
+        self.final_amount = self.subtotal - self.total_discount
+        super().save(*args, **kwargs)
+        
+        # Update user's loyalty points if order is completed
+        if self.status == 'completed' and not self.is_cancelled and not self.is_returned:
+            self.user.update_loyalty_points()
 
 class OrderItem(models.Model):
     """Items within an order"""
@@ -203,3 +224,19 @@ class OrderItem(models.Model):
     
     def __str__(self):
         return f" {self.quantity} x {self.product.name}--(Order #{self.order.id}) "
+    
+    def save(self, *args, **kwargs):
+        """Set unit price and category from product if not set """
+        
+        if not self.unit_price:
+            self.unit_price = self.product.price
+        if not self.category_id:
+            self.category = self.product.category
+        
+        super().save(*args, **kwargs)
+        
+        # Update order subtotal when item is saved
+        if self.order_id:
+            self.order.subtotal = self.order.items.aggregate(
+                total=Sum(F('quantity') * F('unit_price')))['total'] or 0
+            self.order.save()
