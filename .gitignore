@@ -7,8 +7,10 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media/
+.env
 
 ### Python ###
 *.py[cod]
 *$py.class
 *.so
+env
