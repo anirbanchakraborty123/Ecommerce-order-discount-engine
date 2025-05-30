@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db.models import Count, Sum
 from django.core.cache import cache
 from .models import (
-    User, ProductCategory, Product,
+    CustomUser, ProductCategory, Product,
     Order, OrderItem, DiscountRule
 )
 
@@ -15,7 +15,7 @@ class OrderItemInline(admin.TabularInline):
     fields = ['product', 'quantity', 'unit_price', 'category', 'item_discount']
 
 
-@admin.register(User)
+@admin.register(CustomUser)
 class UserAdmin(admin.ModelAdmin):
     """ Admin configuration for User model """
     list_display = ['username', 'email', 'loyalty_points']

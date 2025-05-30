@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 import environ
+# from order_management.views import StandardResultsSetPagination
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -145,7 +146,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'order_management.api.StandardResultsSetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'order_management.utils.StandardResultsSetPagination',
     'PAGE_SIZE': 10
 }
 

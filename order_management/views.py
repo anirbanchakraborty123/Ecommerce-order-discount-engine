@@ -1,6 +1,5 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from django.core.cache import cache
 from django.db import transaction
 
@@ -11,13 +10,9 @@ from .serializers import (
     OrderCreateSerializer,
     DiscountRuleSerializer
 )
-from .utils import DiscountCalculator
+from order_management.utils import StandardResultsSetPagination
 
-class StandardResultsSetPagination(PageNumberPagination):
-    """Custom pagination class"""
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
+
 
 class ProductListView(generics.ListAPIView):
     """List all available products with pagination """
@@ -79,6 +74,7 @@ class OrderListView(generics.ListCreateAPIView):
             )
         
         # Calculate discounts
+        from .utils import DiscountCalculator
         DiscountCalculator(order).calculate_discounts()
         
         # Return created order

@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.utils import timezone
 from django.db.models import Sum, F, Count
 from django.conf import settings
-from .utils import DiscountCalculator
+# from .utils import DiscountCalculator
 class CustomUser(AbstractUser):
     """Extended user model for e-commerce platform"""
     loyalty_points = models.PositiveIntegerField(default=0)
@@ -176,9 +176,10 @@ class Order(models.Model):
         return f"Order #{self.id} - {self.user.username}"
     
         def calculate_discounts(self):
-        """Calculate all applicable discounts for this order"""
-        calculator = DiscountCalculator(self)
-        return calculator.calculate_discounts()
+            """Calculate all applicable discounts for this order"""
+            from order_management.utils import DiscountCalculator
+            calculator = DiscountCalculator(self)
+            return calculator.calculate_discounts()
     
     def save(self, *args, **kwargs):
         """Override save to ensure proper amounts are set"""
